@@ -1,0 +1,15 @@
+WITH post AS (
+  SELECT
+    p.id AS post_id,
+    p.created_at AS post_time,
+    MIN(datetime(c.created_at)) AS first_eng,
+    MAX(datetime(c.created_at)) AS last_eng
+  FROM posts p
+  JOIN comments c ON c.post_id = p.id
+  GROUP BY p.id
+)
+SELECT
+  AVG( (strftime('%s', first_eng) - strftime('%s', post_time)) / 3600.0 ) AS avg_hours_first,
+  AVG( (strftime('%s', last_eng)  - strftime('%s', post_time)) / 3600.0 ) AS avg_hours_last,
+    COUNT(*) AS total_posts
+FROM post;

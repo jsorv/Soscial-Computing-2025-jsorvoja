@@ -1,0 +1,28 @@
+WITH engagements AS (
+  SELECT c.user_id AS first_id,
+         p.user_id AS second_id
+  FROM comments c
+  JOIN posts p ON p.id = c.post_id
+  UNION ALL
+  SELECT r.user_id AS first_id,
+  p.user_id AS second_id
+  FROM reactions r
+  JOIN posts p ON p.id = r.post_id
+),
+connections AS (
+  SELECT
+  min(first_id, second_id)  AS a_id,
+  max(first_id, second_id)  AS b_id
+  FROM engagements
+  WHERE first_id <> second_id
+)
+SELECT
+  ua.username AS user_a,
+  ub.username AS user_b,
+  COUNT(*)    AS engagements_between
+FROM connections u
+JOIN users ua ON ua.id = u.a_id
+JOIN users ub ON ub.id = u.b_id
+GROUP BY u.a_id, u.b_id
+ORDER BY engagements_between DESC
+LIMIT 3;

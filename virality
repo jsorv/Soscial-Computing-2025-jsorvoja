@@ -1,0 +1,15 @@
+SELECT 
+    t.post_id,
+    p.content,
+    COUNT(*) AS most_viral
+FROM (
+    SELECT reactions.post_id
+    FROM reactions
+    UNION ALL
+    SELECT comments.post_id
+    FROM comments
+) AS t
+JOIN posts p ON p.id = t.post_id
+GROUP BY t.post_id
+ORDER BY most_viral DESC
+LIMIT 3;

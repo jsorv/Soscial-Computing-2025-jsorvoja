@@ -1,0 +1,39 @@
+import sqlite3
+import matplotlib.pyplot as plt
+from datetime import datetime
+import matplotlib.dates as mdates
+
+DB_PATH = "database.sqlite"
+
+with sqlite3.connect(DB_PATH) as con:
+    cur = con.cursor()
+    cur.execute("""
+        SELECT strftime('%Y-%m', created_at) AS month, COUNT(*) AS new_users
+        FROM users
+        GROUP BY month
+        ORDER BY month
+    """)
+    rows = cur.fetchall()
+
+months = []
+total_users = []
+cum_sum = 0
+for m, cnt in rows:
+    cum_sum += cnt
+    months.append(datetime.strptime(m, "%Y-%m"))
+    total_users.append(cum_sum)
+
+plt.figure(figsize=(12,5))
+plt.plot(months, total_users, marker="o", label="käyttäjät")
+
+plt.gca().xaxis.set_major_locator(mdates.MonthLocator(interval=1))
+plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%Y-%m"))
+plt.xticks(rotation=45, ha="right")
+
+plt.xlabel("Kuukausi")
+plt.ylabel("Käyttäjiä")
+plt.title("Käyttäjämäärän kasvu kuukausittain")
+plt.legend()
+plt.grid(True)
+plt.tight_layout()
+plt.show()
